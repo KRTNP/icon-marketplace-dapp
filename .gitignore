@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# Environment files
+.env
+.env.*
+backend/.env
+frontend/.env
+!.env.example
+!backend/.env.example
+!frontend/.env.example
+
+# Build and cache
+backend/artifacts/
+backend/cache/
+backend/coverage/
+backend/coverage.json
+backend/typechain/
+backend/typechain-types/
+frontend/dist/
+
+# Deployment outputs
+backend/deployment-*.json
+
+# OS/editor
+.DS_Store
+*.log
+*.tmp
+*.swp
+*:Zone.Identifier
