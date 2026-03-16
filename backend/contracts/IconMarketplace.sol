@@ -8,6 +8,7 @@ contract IconMarketplace {
         uint256 price;
         address payable seller;
         string encryptedIconURL;
+        string previewImageURL;
         bool sold;
         uint256 totalSales;
         bool active;
@@ -21,7 +22,8 @@ contract IconMarketplace {
         uint256 indexed id,
         string name,
         uint256 price,
-        address indexed seller
+        address indexed seller,
+        string previewImageURL
     );
 
     event IconPurchased(
@@ -35,13 +37,18 @@ contract IconMarketplace {
     function addIcon(
         string memory name,
         uint256 price,
-        string memory encryptedIconURL
+        string memory encryptedIconURL,
+        string memory previewImageURL
     ) external {
         require(bytes(name).length > 0, "Name cannot be empty");
         require(price > 0, "Price must be greater than zero");
         require(
             bytes(encryptedIconURL).length > 0,
             "Encrypted URL cannot be empty"
+        );
+        require(
+            bytes(previewImageURL).length > 0,
+            "Preview image URL cannot be empty"
         );
 
         uint256 iconId = iconCount;
@@ -51,13 +58,14 @@ contract IconMarketplace {
             price: price,
             seller: payable(msg.sender),
             encryptedIconURL: encryptedIconURL,
+            previewImageURL: previewImageURL,
             sold: false,
             totalSales: 0,
             active: true
         });
 
         iconCount += 1;
-        emit IconAdded(iconId, name, price, msg.sender);
+        emit IconAdded(iconId, name, price, msg.sender, previewImageURL);
     }
 
     function buyIcon(uint256 iconId) external payable {

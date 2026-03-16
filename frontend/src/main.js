@@ -2,12 +2,12 @@ import { ethers } from "ethers";
 
 const ABI = [
   "function iconCount() view returns (uint256)",
-  "function icons(uint256) view returns (uint256 id, string name, uint256 price, address seller, string encryptedIconURL, bool sold, uint256 totalSales, bool active)",
+  "function icons(uint256) view returns (uint256 id, string name, uint256 price, address seller, string encryptedIconURL, string previewImageURL, bool sold, uint256 totalSales, bool active)",
   "function hasUserPurchased(uint256 iconId, address user) view returns (bool)",
-  "function addIcon(string name, uint256 price, string encryptedIconURL)",
+  "function addIcon(string name, uint256 price, string encryptedIconURL, string previewImageURL)",
   "function buyIcon(uint256 iconId) payable",
   "function setIconActive(uint256 iconId, bool active)",
-  "event IconAdded(uint256 indexed id, string name, uint256 price, address indexed seller)",
+  "event IconAdded(uint256 indexed id, string name, uint256 price, address indexed seller, string previewImageURL)",
   "event IconPurchased(uint256 indexed id, address indexed buyer, address indexed seller, uint256 price, uint256 totalSales)"
 ];
 
@@ -208,8 +208,9 @@ async function addIcon() {
   const name = $("name").value.trim();
   const priceInput = $("price").value.trim();
   const url = $("url").value.trim();
+  const imageUrl = $("imageUrl").value.trim();
 
-  if (!name || !priceInput || !url) {
+  if (!name || !priceInput || !url || !imageUrl) {
     setStatus("Please fill in all fields", "err");
     return;
   }
@@ -224,7 +225,7 @@ async function addIcon() {
     const price = ethers.parseEther(priceInput);
     const encryptedURL = await encryptURL(url);
 
-    const tx = await state.contract.addIcon(name, price, encryptedURL);
+    const tx = await state.contract.addIcon(name, price, encryptedURL, imageUrl);
     setTxStatus({ stage: "Pending addIcon", hash: tx.hash, chainId: state.chainId });
     setStatus("Transaction pending: Adding icon...", "muted");
 
@@ -235,6 +236,7 @@ async function addIcon() {
     $("name").value = "";
     $("price").value = "";
     $("url").value = "";
+    $("imageUrl").value = "";
 
     await loadAllData();
   } catch (error) {
@@ -288,6 +290,7 @@ function renderMarketplace(items) {
     const isActive = Boolean(icon.active);
 
     card.innerHTML = `
+      <img src="${icon.previewImageURL}" alt="${icon.name}" style="width:100%;height:180px;object-fit:cover;border-radius:6px;margin-bottom:8px;" />
       <div style="font-size: 1.06rem; margin-bottom: 8px;"><b>${icon.name}</b> (#${icon.id})</div>
       <div class="muted">Seller: ${shortAddr(icon.seller)}</div>
       <div>Price: ${ethers.formatEther(icon.price)} ETH</div>
@@ -362,6 +365,7 @@ function renderMyPurchases(items) {
     const card = document.createElement("div");
     card.className = "card";
     card.innerHTML = `
+      <img src="${icon.previewImageURL}" alt="${icon.name}" style="width:100%;height:160px;object-fit:cover;border-radius:6px;margin-bottom:8px;" />
       <div><b>${icon.name}</b> (#${icon.id})</div>
       <div class="muted">Seller: ${shortAddr(icon.seller)}</div>
       <div>Price Paid: ${ethers.formatEther(icon.price)} ETH</div>

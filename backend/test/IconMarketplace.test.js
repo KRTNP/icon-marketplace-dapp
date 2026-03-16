@@ -18,13 +18,19 @@ describe("IconMarketplace", function () {
     const price = ethers.parseEther("0.1");
     await market
       .connect(seller)
-      .addIcon("SEO Pack", price, "enc://ciphertext-payload");
+      .addIcon(
+        "SEO Pack",
+        price,
+        "enc://ciphertext-payload",
+        "https://cdn.example/seo-pack.png"
+      );
 
     expect(await market.iconCount()).to.equal(1);
     const icon = await market.icons(0);
     expect(icon.name).to.equal("SEO Pack");
     expect(icon.price).to.equal(price);
     expect(icon.seller).to.equal(seller.address);
+    expect(icon.previewImageURL).to.equal("https://cdn.example/seo-pack.png");
     expect(icon.sold).to.equal(false);
     expect(icon.totalSales).to.equal(0);
     expect(icon.active).to.equal(true);
@@ -34,21 +40,36 @@ describe("IconMarketplace", function () {
     await expect(
       market
         .connect(seller)
-        .addIcon("", ethers.parseEther("0.1"), "enc://x")
+        .addIcon(
+          "",
+          ethers.parseEther("0.1"),
+          "enc://x",
+          "https://cdn.example/x.png"
+        )
     ).to.be.revertedWith("Name cannot be empty");
 
     await expect(
-      market.connect(seller).addIcon("Pack", 0, "enc://x")
+      market
+        .connect(seller)
+        .addIcon("Pack", 0, "enc://x", "https://cdn.example/x.png")
     ).to.be.revertedWith("Price must be greater than zero");
 
     await expect(
-      market.connect(seller).addIcon("Pack", ethers.parseEther("0.1"), "")
+      market
+        .connect(seller)
+        .addIcon("Pack", ethers.parseEther("0.1"), "", "https://cdn.example/x.png")
     ).to.be.revertedWith("Encrypted URL cannot be empty");
+
+    await expect(
+      market.connect(seller).addIcon("Pack", ethers.parseEther("0.1"), "enc://x", "")
+    ).to.be.revertedWith("Preview image URL cannot be empty");
   });
 
   it("supports multiple different buyers", async function () {
     const price = ethers.parseEther("0.2");
-    await market.connect(seller).addIcon("UI Kit", price, "enc://ui");
+    await market
+      .connect(seller)
+      .addIcon("UI Kit", price, "enc://ui", "https://cdn.example/ui-kit.png");
 
     await expect(() => market.connect(buyer).buyIcon(0, { value: price })).to.changeEtherBalances(
       [buyer, seller],
@@ -70,7 +91,9 @@ describe("IconMarketplace", function () {
 
   it("rejects duplicate buy from same user and wrong payment", async function () {
     const price = ethers.parseEther("0.2");
-    await market.connect(seller).addIcon("UI Kit", price, "enc://ui");
+    await market
+      .connect(seller)
+      .addIcon("UI Kit", price, "enc://ui", "https://cdn.example/ui-kit.png");
 
     await expect(
       market.connect(seller).buyIcon(0, { value: price })
@@ -89,7 +112,9 @@ describe("IconMarketplace", function () {
   it("enforces purchase rights for encrypted URL", async function () {
     const price = ethers.parseEther("0.2");
     const encrypted = "enc://secret";
-    await market.connect(seller).addIcon("UI Kit", price, encrypted);
+    await market
+      .connect(seller)
+      .addIcon("UI Kit", price, encrypted, "https://cdn.example/ui-kit.png");
 
     await expect(
       market.connect(buyer).getEncryptedDownloadURL(0)
@@ -117,7 +142,9 @@ describe("IconMarketplace", function () {
 
   it("allows seller to disable listing", async function () {
     const price = ethers.parseEther("0.2");
-    await market.connect(seller).addIcon("UI Kit", price, "enc://ui");
+    await market
+      .connect(seller)
+      .addIcon("UI Kit", price, "enc://ui", "https://cdn.example/ui-kit.png");
     await market.connect(seller).setIconActive(0, false);
 
     await expect(
