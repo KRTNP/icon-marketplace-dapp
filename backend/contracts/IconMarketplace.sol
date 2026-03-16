@@ -7,37 +7,42 @@ contract IconMarketplace {
         string name;
         uint256 price;
         address payable seller;
-        string iconURL;
+        string encryptedIconURL;
         bool sold;
+        uint256 totalSales;
+        bool active;
     }
 
     mapping(uint256 => Icon) public icons;
-    mapping(uint256 => address) public iconBuyers;
+    mapping(uint256 => mapping(address => bool)) private purchases;
     uint256 public iconCount;
 
     event IconAdded(
         uint256 indexed id,
         string name,
         uint256 price,
-        address indexed seller,
-        string iconURL
+        address indexed seller
     );
 
     event IconPurchased(
         uint256 indexed id,
         address indexed buyer,
         address indexed seller,
-        uint256 price
+        uint256 price,
+        uint256 totalSales
     );
 
     function addIcon(
         string memory name,
         uint256 price,
-        string memory iconURL
+        string memory encryptedIconURL
     ) external {
         require(bytes(name).length > 0, "Name cannot be empty");
         require(price > 0, "Price must be greater than zero");
-        require(bytes(iconURL).length > 0, "Icon URL cannot be empty");
+        require(
+            bytes(encryptedIconURL).length > 0,
+            "Encrypted URL cannot be empty"
+        );
 
         uint256 iconId = iconCount;
         icons[iconId] = Icon({
@@ -45,35 +50,63 @@ contract IconMarketplace {
             name: name,
             price: price,
             seller: payable(msg.sender),
-            iconURL: iconURL,
-            sold: false
+            encryptedIconURL: encryptedIconURL,
+            sold: false,
+            totalSales: 0,
+            active: true
         });
 
         iconCount += 1;
-        emit IconAdded(iconId, name, price, msg.sender, iconURL);
+        emit IconAdded(iconId, name, price, msg.sender);
     }
 
     function buyIcon(uint256 iconId) external payable {
         require(iconId < iconCount, "Icon does not exist");
 
         Icon storage icon = icons[iconId];
-        require(!icon.sold, "Icon already sold");
+        require(icon.active, "Icon is inactive");
         require(msg.sender != icon.seller, "Cannot buy your own icon");
         require(msg.value == icon.price, "Incorrect ETH amount");
+        require(!purchases[iconId][msg.sender], "Already purchased");
 
-        icon.sold = true;
-        iconBuyers[iconId] = msg.sender;
+        purchases[iconId][msg.sender] = true;
+        icon.totalSales += 1;
+        if (!icon.sold) {
+            icon.sold = true;
+        }
+
         icon.seller.transfer(msg.value);
 
-        emit IconPurchased(iconId, msg.sender, icon.seller, icon.price);
+        emit IconPurchased(
+            iconId,
+            msg.sender,
+            icon.seller,
+            icon.price,
+            icon.totalSales
+        );
     }
 
-    function getDownloadURL(uint256 iconId) external view returns (string memory) {
+    function hasUserPurchased(
+        uint256 iconId,
+        address user
+    ) external view returns (bool) {
         require(iconId < iconCount, "Icon does not exist");
-        Icon memory icon = icons[iconId];
-        require(icon.sold, "Icon not sold");
-        require(iconBuyers[iconId] == msg.sender, "Not buyer");
+        return purchases[iconId][user];
+    }
 
-        return icon.iconURL;
+    function getEncryptedDownloadURL(
+        uint256 iconId
+    ) external view returns (string memory) {
+        require(iconId < iconCount, "Icon does not exist");
+        require(purchases[iconId][msg.sender], "Not buyer");
+
+        return icons[iconId].encryptedIconURL;
+    }
+
+    function setIconActive(uint256 iconId, bool active) external {
+        require(iconId < iconCount, "Icon does not exist");
+        Icon storage icon = icons[iconId];
+        require(msg.sender == icon.seller, "Not seller");
+        icon.active = active;
     }
 }
