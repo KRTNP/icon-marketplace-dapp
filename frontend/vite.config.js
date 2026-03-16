@@ -9,6 +9,11 @@ module.exports = defineConfig({
         target: "http://127.0.0.1:4315",
         changeOrigin: true,
         secure: false
+      },
+      "/uploads": {
+        target: "http://127.0.0.1:4315",
+        changeOrigin: true,
+        secure: false
       }
     }
   }

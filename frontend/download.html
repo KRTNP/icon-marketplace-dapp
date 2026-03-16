@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Download Icon Asset</title>
+    <script type="module" src="/src/download.js"></script>
+    <style>
+      :root {
+        --bg: #f8fafc;
+        --card: #ffffff;
+        --text: #0f172a;
+        --muted: #64748b;
+        --border: #e2e8f0;
+        --primary: #2563eb;
+      }
+
+      body {
+        margin: 0;
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      .wrap {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .card {
+        width: min(640px, 100%);
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 14px 40px rgba(15, 23, 42, 0.12);
+      }
+
+      h1 { margin: 0 0 10px 0; font-size: 1.3rem; }
+      p { margin: 8px 0; color: var(--muted); }
+      code { word-break: break-all; }
+      .meta-list {
+        margin: 8px 0 0;
+        padding: 0;
+        list-style: none;
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+      .meta-list li { margin: 4px 0; }
+      .label { color: #334155; font-weight: 600; }
+
+      .actions { margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap; }
+      .hidden { display: none !important; }
+
+      a.btn {
+        display: inline-block;
+        background: var(--primary);
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: 0.92rem;
+      }
+
+      a.btn.secondary {
+        background: #f1f5f9;
+        color: var(--text);
+        border: 1px solid var(--border);
+      }
+
+      button.btn {
+        border: none;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card">
+        <h1 id="title">Secure Download</h1>
+        <p id="meta"></p>
+        <p id="status">Verify your purchase to unlock the download.</p>
+        <ul id="fileMeta" class="meta-list hidden">
+          <li><span class="label">File:</span> <span id="fileName"></span></li>
+          <li><span class="label">Type:</span> <span id="fileType"></span></li>
+          <li id="fileSizeRow" class="hidden"><span class="label">Size:</span> <span id="fileSize"></span></li>
+        </ul>
+        <div class="actions">
+          <button id="revealBtn" class="btn" type="button">Verify &amp; Reveal</button>
+          <button id="retryBtn" class="btn secondary hidden" type="button">Retry</button>
+          <a id="downloadBtn" class="btn hidden" href="#" target="_blank" rel="noreferrer">Download Now</a>
+          <a class="btn secondary" href="/">Back to Marketplace</a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
