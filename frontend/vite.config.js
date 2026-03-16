@@ -1,6 +1,14 @@
-const { defineConfig } = require("vite");
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import path from "path";
 
-module.exports = defineConfig({
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
   server: {
     host: "127.0.0.1",
     port: 3000,
@@ -8,13 +16,13 @@ module.exports = defineConfig({
       "/api": {
         target: "http://127.0.0.1:4315",
         changeOrigin: true,
-        secure: false
+        secure: false,
       },
       "/uploads": {
         target: "http://127.0.0.1:4315",
         changeOrigin: true,
-        secure: false
-      }
-    }
-  }
+        secure: false,
+      },
+    },
+  },
 });
