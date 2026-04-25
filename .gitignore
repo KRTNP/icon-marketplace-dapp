@@ -23,6 +23,7 @@ frontend/dist/
 
 # Deployment outputs
 backend/deployment-*.json
+backend/uploads/
 
 # OS/editor
 .DS_Store
@@ -30,3 +31,6 @@ backend/deployment-*.json
 *.tmp
 *.swp
 *:Zone.Identifier
+
+# Local agent tooling
+.agents/
